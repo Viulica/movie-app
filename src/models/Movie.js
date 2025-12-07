@@ -1,83 +1,39 @@
 import mongoose from 'mongoose';
 
 const MovieSchema = new mongoose.Schema({
-  tmdbId: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   title: {
     type: String,
     required: true,
   },
-  overview: {
+  year: {
+    type: Number,
+    required: true,
+  },
+  poster: {
     type: String,
   },
-  releaseDate: {
-    type: String,
-  },
-  posterPath: {
-    type: String,
-  },
-  backdropPath: {
-    type: String,
-  },
-  voteAverage: {
+  rating: {
     type: Number,
   },
-  voteCount: {
-    type: Number,
-  },
-  genreIds: [{
-    type: Number,
-  }],
-  genres: [{
-    type: String,
-  }],
-  popularity: {
-    type: Number,
-  },
-  imdbId: {
+  genre: {
     type: String,
   },
-  imdbRating: {
+  source: {
     type: String,
+    enum: ['TMDB', 'OMDB'],
+    required: true,
   },
-  imdbVotes: {
+  sourceId: {
     type: String,
-  },
-  plot: {
-    type: String,
-  },
-  director: {
-    type: String,
-  },
-  actors: {
-    type: String,
-  },
-  writer: {
-    type: String,
-  },
-  runtime: {
-    type: String,
-  },
-  language: {
-    type: String,
-  },
-  country: {
-    type: String,
-  },
-  awards: {
-    type: String,
-  },
-  boxOffice: {
-    type: String,
+    required: true,
   },
   fetchedAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+MovieSchema.index({ source: 1, sourceId: 1 }, { unique: true });
 
 let Movie;
 try {
