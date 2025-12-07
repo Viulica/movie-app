@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Drumre Lab 1 - Filmovi i Glazba",
-  description: "Aplikacija za dohvat i upravljanje filmovima i glazbom",
+  title: "Drumre Lab 1 - Filmovi",
+  description: "Aplikacija za dohvat i upravljanje filmovima",
 };
 
 export default function RootLayout({ children }) {

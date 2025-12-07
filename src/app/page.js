@@ -27,7 +27,7 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center gap-8 p-8">
         <div className="text-center">
           <h1 className="mb-4 text-5xl font-bold text-gray-900 dark:text-white">
-            Filmovi i Glazba
+            Filmovi
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300">
             Prijavite se za pristup aplikaciji
