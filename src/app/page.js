@@ -1,25 +1,27 @@
-'use client';
+"use client";
 
-import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard');
+    if (status === "authenticated") {
+      router.push("/dashboard");
     }
   }, [status, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center">
-          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-gray-300 border-r-gray-900 dark:border-gray-600 dark:border-r-white"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Učitavanje...</p>
+          <div className="mb-4">
+            <Spinner className="h-8 w-8" />
+          </div>
         </div>
       </div>
     );
@@ -39,7 +41,7 @@ export default function Home() {
           </div>
 
           <button
-            onClick={() => signIn('google')}
+            onClick={() => signIn("google")}
             className="w-full flex items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
