@@ -90,20 +90,25 @@ export function MovieCard({ movie, onDelete }) {
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1"
-            onClick={toggleSave}
-          >
-            <Heart
-              className={`size-4 sm:size-6 ${
-                isSaved
-                  ? "fill-red-500 stroke-red-500 dark:fill-red-900 dark:stroke-red-900"
-                  : ""
-              }`}
-            />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-1"
+              onClick={toggleSave}
+            >
+              <Heart
+                className={`size-4 sm:size-6 ${
+                  isSaved
+                    ? "fill-red-500 stroke-red-500 dark:fill-red-900 dark:stroke-red-900"
+                    : ""
+                }`}
+              />
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              ({Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000})
+            </span>
+          </div>
         </div>
 
         <div className="mb-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
