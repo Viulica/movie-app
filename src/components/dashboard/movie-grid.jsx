@@ -1,4 +1,4 @@
-import { MovieCard } from "./MovieCard";
+import { MovieCard } from "./movie-card";
 
 export function MovieGrid({ movies, onDeleteMovie }) {
   return (

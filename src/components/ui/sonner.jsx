@@ -7,7 +7,7 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useAccessibility } from "@/hooks/useAccessibility";
+import { useAccessibility } from "@/hooks/use-accessibility";
 import { Toaster as Sonner } from "sonner";
 
 const Toaster = ({ ...props }) => {

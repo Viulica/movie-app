@@ -3,9 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FilterSection } from "@/components/dashboard/FilterSection";
-import { MovieCard } from "@/components/dashboard/MovieCard";
-import { useMovies } from "@/hooks/useMovies";
+import { FilterSection } from "@/components/dashboard/filter-section";
+import { MovieCard } from "@/components/dashboard/movie-card";
+import { useMovies } from "@/hooks/use-movies";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Empty,
@@ -41,8 +41,6 @@ export default function Explore() {
   const handleClear = () => {
     fetchMovies();
   };
-
-  if (!session) return null;
 
   return (
     <div>

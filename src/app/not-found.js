@@ -33,12 +33,12 @@ export default function NotFound() {
           <EmptyContent>
             <div className="flex gap-2">
               <Button onClick={() => router.back()}>
-                <ChevronLeftIcon className="mr-2 h-4 w-4" />
+                <ChevronLeftIcon className="mr-2 size-4" />
                 Povratak
               </Button>
               <Link href="/explore">
                 <Button variant="outline">
-                  <HomeIcon className="mr-2 h-4 w-4" />
+                  <HomeIcon className="mr-2 size-4" />
                   Idi na Explore
                 </Button>
               </Link>

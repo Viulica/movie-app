@@ -13,10 +13,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDownIcon, DownloadIcon, LogOutIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { use } from "react";
 
-export function DashboardHeader() {
+export function Navbar() {
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -24,6 +25,7 @@ export function DashboardHeader() {
     <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
+          <SidebarTrigger className="md:hidden" />
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Filmovi
           </h1>
@@ -70,12 +72,12 @@ export function DashboardHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <ChevronDownIcon className="h-4 w-4" />
+                  <ChevronDownIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  <DownloadIcon className="mr-2 h-4 w-4" />
+                  <DownloadIcon className="mr-2 size-4" />
                   Dohvati filmove
                 </DropdownMenuItem>
 
@@ -90,7 +92,7 @@ export function DashboardHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  <LogOutIcon className="mr-2 size-4" />
                   Odjavi se
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -122,7 +124,7 @@ export function DashboardHeader() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem>
-                  <DownloadIcon className="mr-2 h-4 w-4" />
+                  <DownloadIcon className="mr-2 size-4" />
                   Dohvati filmove
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -138,7 +140,7 @@ export function DashboardHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  <LogOutIcon className="mr-2 size-4" />
                   Odjavi se
                 </DropdownMenuItem>
               </DropdownMenuContent>

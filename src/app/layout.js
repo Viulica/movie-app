@@ -2,9 +2,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { AccessibilityProvider } from "@/hooks/useAccessibility";
-import { ThemeApplier } from "@/components/ThemeApplier";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { AccessibilityProvider } from "@/hooks/use-accessibility";
+import { ThemeApplier } from "@/components/theme-applier";
+import { Navbar } from "@/components/navbar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Filmovi app",
-  description: "Aplikacija za dohvat i upravljanje filmovima",
+  description: "Aplikacija za praćenje gledanja i preporuku filmova",
 };
 
 export default function RootLayout({ children }) {
@@ -30,8 +32,18 @@ export default function RootLayout({ children }) {
         <AccessibilityProvider>
           <ThemeApplier />
           <SessionProvider>
-            <DashboardHeader />
-            <main className="mx-auto max-w-7xl">{children}</main>
+            <SidebarProvider>
+              <AppSidebar />
+
+              <SidebarInset>
+                <Navbar />
+
+                <main className="mx-auto max-w-7xl p-2 sm:p-6 w-full">
+                  {children}
+                </main>
+              </SidebarInset>
+            </SidebarProvider>
+
             <Toaster />
           </SessionProvider>
         </AccessibilityProvider>

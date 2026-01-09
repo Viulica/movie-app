@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
-import { useAccessibility } from "@/hooks/useAccessibility";
+import { useAccessibility } from "@/hooks/use-accessibility";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
 

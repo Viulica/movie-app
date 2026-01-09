@@ -1,8 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
 
 export function MovieCard({ movie, onDelete }) {
+  // Simulate liked state randomly
+  const isLiked = Math.random() > 0.5;
+
   return (
     <Card className="overflow-hidden">
       <div className="relative h-24 sm:h-56 w-full">
@@ -31,13 +35,29 @@ export function MovieCard({ movie, onDelete }) {
         </div>
       </div>
 
-      <CardContent className="py-4 h-full flex flex-col">
-        <CardTitle className="line-clamp-2 text-base">{movie.title}</CardTitle>
+      <CardContent className="p-2 sm:py-4 h-full flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <CardTitle className="line-clamp-2 text-base">
+              {movie.title}
+            </CardTitle>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {movie.year}
+            </div>
+          </div>
+
+          <Button variant="ghost" size="sm" className="p-1">
+            <Heart
+              className={`size-4 sm:size-6 ${
+                isLiked
+                  ? "fill-red-500 stroke-red-500 dark:fill-red-900 dark:stroke-red-900"
+                  : ""
+              }`}
+            />
+          </Button>
+        </div>
 
         <div className="mb-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-1.5">
-            <span>{movie.year}</span>
-          </div>
           {movie.rating > 0 && (
             <div className="flex items-center gap-1.5">
               <span className="text-yellow-500">★</span>

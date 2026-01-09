@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAccessibility } from "@/hooks/useAccessibility";
+import { useAccessibility } from "@/hooks/use-accessibility";
 
 export function ThemeApplier() {
   const { settings, mounted } = useAccessibility();
