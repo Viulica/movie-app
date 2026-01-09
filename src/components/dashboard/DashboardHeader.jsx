@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDownIcon, DownloadIcon, LogOutIcon } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function DashboardHeader({ user, onFetchMovies, loading }) {
   return (
@@ -19,6 +20,7 @@ export function DashboardHeader({ user, onFetchMovies, loading }) {
           Filmovi
         </h1>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {/* Desktop: Show user info and chevron */}
           <div className="hidden sm:flex items-center gap-3">
             <Avatar className="h-8 w-8">
