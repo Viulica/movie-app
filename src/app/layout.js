@@ -4,6 +4,7 @@ import SessionProvider from "@/components/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AccessibilityProvider } from "@/hooks/useAccessibility";
 import { ThemeApplier } from "@/components/ThemeApplier";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +29,11 @@ export default function RootLayout({ children }) {
       >
         <AccessibilityProvider>
           <ThemeApplier />
-          <SessionProvider>{children}</SessionProvider>
-          <Toaster />
+          <SessionProvider>
+            <DashboardHeader />
+            <main className="mx-auto max-w-7xl">{children}</main>
+            <Toaster />
+          </SessionProvider>
         </AccessibilityProvider>
       </body>
     </html>

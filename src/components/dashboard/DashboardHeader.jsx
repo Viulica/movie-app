@@ -1,4 +1,6 @@
-import { signOut } from "next-auth/react";
+"use client";
+
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,14 +13,42 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDownIcon, DownloadIcon, LogOutIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
+import { use } from "react";
 
-export function DashboardHeader({ user, onFetchMovies, loading }) {
+export function DashboardHeader() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Filmovi
-        </h1>
+        <div className="flex items-center gap-6">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Filmovi
+          </h1>
+          <nav className="hidden md:flex items-center gap-4">
+            <Link
+              href="/explore"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
+              Istraži
+            </Link>
+            <Link
+              href="/favorites"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
+              Omiljeni
+            </Link>
+            <Link
+              href="/watched"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
+              Gledano
+            </Link>
+          </nav>
+        </div>
+
         <div className="flex items-center gap-3">
           <ThemeToggle />
           {/* Desktop: Show user info and chevron */}
@@ -44,9 +74,19 @@ export function DashboardHeader({ user, onFetchMovies, loading }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onFetchMovies} disabled={loading}>
+                <DropdownMenuItem>
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Dohvati filmove
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/explore">Explore</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/favorites">Favorites</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/watched">Watched</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
@@ -80,9 +120,21 @@ export function DashboardHeader({ user, onFetchMovies, loading }) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onFetchMovies} disabled={loading}>
+
+                <DropdownMenuItem>
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Dohvati filmove
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                  <Link href="/explore">Explore</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/favorites">Favorites</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/watched">Watched</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
