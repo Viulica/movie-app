@@ -13,7 +13,7 @@ const navigationLinks = [
   },
   {
     title: "Preporučeno",
-    url: "/preporuceno",
+    url: "/recommended",
     icon: Sparkles,
   },
   {
