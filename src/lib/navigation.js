@@ -8,7 +8,7 @@ const navigationLinks = [
   },
   {
     title: "Popularno",
-    url: "/popularno",
+    url: "/popular",
     icon: TrendingUp,
   },
   {
