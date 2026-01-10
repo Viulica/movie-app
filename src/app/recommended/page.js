@@ -15,7 +15,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { SearchIcon, FileTextIcon, SparklesIcon, Download, Trash2 } from "lucide-react";
+import {
+  SearchIcon,
+  FileTextIcon,
+  SparklesIcon,
+  Download,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Recommended() {
@@ -26,6 +32,8 @@ export default function Recommended() {
     type: searchParams.get("type") || "",
     value: searchParams.get("value") || "",
   });
+  const [savedMovies, setSavedMovies] = useState({});
+  const [movieRatings, setMovieRatings] = useState({});
   const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
     useMovies();
 
@@ -39,6 +47,36 @@ export default function Recommended() {
         fetchMovies();
       }
     }
+
+    // Get saved and rated movies to exclude from recommendations
+    const personalData = JSON.parse(
+      localStorage.getItem("DRUMREtempMoviesPersonalData") ||
+        '{"ratedMovies":{},"savedMovies":{}}'
+    );
+    setSavedMovies(personalData.savedMovies);
+    setMovieRatings(personalData.ratedMovies);
+
+    // Listen for custom events
+    const handleSavedMoviesChanged = (event) => {
+      setSavedMovies(event.detail);
+    };
+    const handleMovieRatingsChanged = (event) => {
+      setMovieRatings(event.detail);
+    };
+
+    window.addEventListener("savedMoviesChanged", handleSavedMoviesChanged);
+    window.addEventListener("movieRatingsChanged", handleMovieRatingsChanged);
+
+    return () => {
+      window.removeEventListener(
+        "savedMoviesChanged",
+        handleSavedMoviesChanged
+      );
+      window.removeEventListener(
+        "movieRatingsChanged",
+        handleMovieRatingsChanged
+      );
+    };
   }, [status, searchParams]);
 
   const applyFilter = () => {
@@ -59,19 +97,9 @@ export default function Recommended() {
     router.push("?");
   };
 
-  // Get saved and rated movies to exclude from recommendations
-  const savedMovies = JSON.parse(
-    localStorage.getItem("DRUMREsavedMovies") || "[]"
-  );
-  const movieRatings = JSON.parse(
-    localStorage.getItem("DRUMREmovieRatings") || "{}"
-  );
-
   // Filter out movies that are already saved or rated
   const recommendedMovies = movies.filter(
-    (movie) =>
-      !savedMovies.some((item) => item.id === movie._id) &&
-      !movieRatings[movie._id]?.rating
+    (movie) => !savedMovies[movie._id] && !movieRatings[movie._id]?.rate
   );
 
   return (
