@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/movies?action=cron-fetch",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}
+

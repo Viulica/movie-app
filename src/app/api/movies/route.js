@@ -25,10 +25,11 @@ export async function GET(request) {
     const action = searchParams.get("action");
 
     if (action === "cron-fetch") {
+      const isVercelCron = request.headers.get("x-vercel-cron");
       const cronSecret = searchParams.get("secret");
       const expectedSecret = process.env.CRON_SECRET || "your-secret-key-change-this";
       
-      if (cronSecret !== expectedSecret) {
+      if (!isVercelCron && cronSecret !== expectedSecret) {
         return NextResponse.json(
           { success: false, message: "Unauthorized" },
           { status: 401 }
