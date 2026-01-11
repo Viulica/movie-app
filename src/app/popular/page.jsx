@@ -97,9 +97,12 @@ export default function Popular() {
       </div>
 
       <div className="mb-4 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between overflow-hidden">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           {/* Time Range Tabs */}
-          <div role="tablist" className="flex gap-2 overflow-x-auto">
+          <div
+            role="tablist"
+            className="w-full sm:w-auto flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide snap-x snap-mandatory"
+          >
             {TIME_RANGES.map((range) => (
               <Button
                 key={range.key}
@@ -109,7 +112,7 @@ export default function Popular() {
                 size="sm"
                 onClick={() => handleTimeRangeChange(range.key)}
                 className={cn(
-                  "transition-all",
+                  "transition-all flex-shrink-0 snap-start",
                   timeRange === range.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "hover:bg-muted"
@@ -119,6 +122,7 @@ export default function Popular() {
               </Button>
             ))}
           </div>
+
           <div className="flex gap-2">
             <Button
               onClick={fetchAndSave}
