@@ -17,11 +17,11 @@ export function TimeRangeTabs({ onRangeApplied }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [timeRange, setTimeRange] = useState(
-    searchParams.get("range") || "all"
+    searchParams.get("range") || "today"
   );
 
   useEffect(() => {
-    const initialRange = searchParams.get("range") || "all";
+    const initialRange = searchParams.get("range") || "today";
     setTimeRange(initialRange);
     if (onRangeApplied) {
       onRangeApplied(initialRange);
@@ -31,7 +31,7 @@ export function TimeRangeTabs({ onRangeApplied }) {
   useEffect(() => {
     // Update URL when time range changes
     const params = new URLSearchParams();
-    if (timeRange !== "all") {
+    if (timeRange !== "today") {
       params.set("range", timeRange);
     }
     const newUrl = `?${params.toString()}`;
