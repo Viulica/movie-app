@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { NavUserSidebar } from "@/components/navbar/nav-user-sidebar";
+import { NavUserSidebar } from "@/components/navigation/nav-user-sidebar";
 import {
   Sidebar,
   SidebarContent,
@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Spinner } from "./ui/spinner";
+import { Spinner } from "../ui/spinner";
 import { usePathname } from "next/navigation";
 import { navigationLinks } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import { AccessibilityWidget } from "@/components/accessibility-widget";
-import { ThemeToggle } from "@/components/navbar/theme-toggle";
+import { AccessibilityWidget } from "@/components/navigation/accessibility-widget";
+import { ThemeToggle } from "@/components/navigation/theme-toggle";
 import { Eye, X } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 

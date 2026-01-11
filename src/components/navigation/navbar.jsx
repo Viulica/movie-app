@@ -1,11 +1,11 @@
 "use client";
 
-import { ThemeToggle } from "@/components/navbar/theme-toggle";
-import { AccessibilityWidget } from "@/components/accessibility-widget";
+import { ThemeToggle } from "@/components/navigation/theme-toggle";
+import { AccessibilityWidget } from "@/components/navigation/accessibility-widget";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { NavUserNavbar } from "@/components/navbar/nav-user-navbar";
+import { NavUserNavbar } from "@/components/navigation/nav-user-navbar";
 import { navigationLinks } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
 import { Eye } from "lucide-react";
