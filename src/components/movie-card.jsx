@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+
 export function MovieCard({ movie, onDelete }) {
   const [isSaved, setIsSaved] = useState(false);
   const [userRating, setUserRating] = useState(0);
@@ -21,14 +22,36 @@ export function MovieCard({ movie, onDelete }) {
     setUserRating(personalData.ratedMovies[movie._id]?.rate || 0);
   }, [movie._id]);
 
-  function toggleSave() {
+  async function toggleSave() {
     const personalData = JSON.parse(
       localStorage.getItem("DRUMREtempMoviesPersonalData") ||
         '{"ratedMovies":{},"savedMovies":{}}'
     );
     if (isSaved) {
       delete personalData.savedMovies[movie._id];
+      const response = await fetch('/api/saved_movies',
+      {
+        method:"DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: "unsave",
+          movieId: movie._id,
+         }),
+      });
     } else {
+      try {
+        const response = await fetch("/api/saved_movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: "save",
+          movieId: movie._id,
+         }),
+      });
+      }
+      catch(error) {
+        console.log(error);
+      }
       personalData.savedMovies[movie._id] = {
         timestamp: Date.now(),
         like: true,
