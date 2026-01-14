@@ -5,21 +5,66 @@ import Movie from "@/models/Movie";
 import SavedMovie from "@/models/SavedMovie";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+/*
+  /api/saved_movies?type=popularity - returns a table of popularity scores by movieId
+  /api/saved_movies - returns a raw list of all userId-movieId relationships
+*/
 export async function GET(request)
  {
     try 
     {
         await connectDB();
         const { searchParams } = new URL(request.url);
+        const type = searchParams.get("type");
+        console.log("GET.type =",type);
 
-        const saves = await Movie.find({});
+        const saves = await SavedMovie.find({});
 
-        console.log("ALL SAVED MOVIES DUMP: ",saves);
+        if (type === "popularity") {
 
+          // popularity algorithm
+
+          /// popularity gain from a save/rating
+          function calculateValue(rtng) {
+            if(!rtng) return 1;
+            return (rtng -1) / 3;
+          }
+
+          /// filter out saves older than designated time window
+          const timeRange = searchParams.get("timeRange");
+          const timeOfReq = Date.now();
+          let maxTime = 86400000; //1 day
+          if (timeRange=="week") maxTime = maxTime * 7;
+          if (timeRange=="month") maxTime = maxTime * 30;
+          if (timeRange=="year") maxTime = maxTime * 360;
+
+          const dateFilter = saves.filter(s =>
+            new Date(s.createdAt).getTime() > timeOfReq - maxTime
+          );
+
+          /// calculate popularity score for each saved movie
+          const scoreMap = dateFilter.reduce((acm,s) => {
+            acm[s.movieId] = (acm[s.movieId] || 0)+calculateValue(s.rating);
+            return acm;
+          }, {});
+          const sorted = Object.fromEntries(
+            Object.entries(scoreMap).sort(([,a],[,b]) => b-a)
+          );
+          const final = JSON.stringify(sorted);
+
+          console.log("popularity scores: ",final);
+          return NextResponse.json(
+          {
+            success: true,
+            final
+          });
+        }
+
+        // default - no search type requested, return all saves
         return NextResponse.json(
         {
           success: true,
-          saves,
+          saves
         });
     }
     catch(error)
@@ -33,8 +78,10 @@ export async function GET(request)
 
 export async function POST(request) {
   try {
-    const { action, movieId } = await request.json();
+    const { action, movieId, rating } = await request.json();
     await connectDB();
+
+    // movie id not in database
 
     const movie = await Movie.findById(movieId);
     if(!movie)
@@ -46,30 +93,61 @@ export async function POST(request) {
       })
     }
 
-    
-    //todo wrong action, movie already in db case.
-
     const session = await getServerSession(authOptions);
 
-    const duplicate = await SavedMovie.findOne({
-      userId: session.user.id,
-      movieId : movieId,
-    })
-    if(duplicate)
+    switch(action)
     {
-      return NextResponse.json(
-      { success: false, message: "already saved"}
-    );
-    }
+      //saving
 
-    const save = await SavedMovie.create({
+      case "save":
+
+      const duplicate = await SavedMovie.findOne({
         userId: session.user.id,
-        movieId,
-    });
+        movieId : movieId,
+      })
+      if(duplicate)
+      {
+        return NextResponse.json(
+        { success: false, message: "already saved"}
+        );
+      }
 
-    console.log("saved movie = ",save);
+      const save = await SavedMovie.create({
+          userId: session.user.id,
+          movieId,
+      });
 
-    return NextResponse.json({success: true})
+      console.log("saved movie = ",save);
+
+      return NextResponse.json({success: true});
+      break;
+
+      // rating
+
+      case "rate":
+        console.log("Rating a movie ",rating);
+
+        const mv = await SavedMovie.findOne({
+        userId: session.user.id,
+        movieId : movieId,
+        })
+        // movie alrady saved
+        if(mv)
+        {
+          mv.rating = rating;
+          await mv.save();
+          
+          return NextResponse.json(
+          { success: true, message: "movie rated"});
+        }
+        // ignore for now
+        else
+        {
+          return NextResponse.json(
+          { success: false, message: "cannot rate unsaved movies"});
+        }
+        break;
+    }
   }
   catch(error)
   {

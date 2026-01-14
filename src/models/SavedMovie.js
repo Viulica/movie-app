@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 const SavedMovieSchema = new mongoose.Schema
 ({
-    userId: {
-    type: String,
+  userId: {
+    type: String
   },
-    movieId : {
-    type: String,
+  movieId : {
+    type: String
+  },
+  rating : {
+    type: Number
   }
 },
 { timestamps: true });

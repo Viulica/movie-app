@@ -57,6 +57,7 @@ export function MovieCard({ movie, onDelete }) {
         like: true,
       };
     }
+
     localStorage.setItem(
       "DRUMREtempMoviesPersonalData",
       JSON.stringify(personalData)
@@ -69,18 +70,40 @@ export function MovieCard({ movie, onDelete }) {
     );
   }
 
-  function handleRatingChange(newRating) {
+  async function handleRatingChange(newRating) {
+    //todo remove
     const personalData = JSON.parse(
       localStorage.getItem("DRUMREtempMoviesPersonalData") ||
         '{"ratedMovies":{},"savedMovies":{}}'
     );
+    // 
+
+
     if (newRating === 0) {
+      //todo
       delete personalData.ratedMovies[movie._id];
     } else {
+      //todo remove
       personalData.ratedMovies[movie._id] = {
         rate: newRating,
         timestamp: Date.now(),
       };
+      //
+
+      try {
+        const response = await fetch("/api/saved_movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: "rate",
+          movieId: movie._id,
+          rating : newRating
+         }),
+      });
+      }
+      catch(error) {
+        console.log(error);
+      }
     }
     localStorage.setItem(
       "DRUMREtempMoviesPersonalData",
