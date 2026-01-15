@@ -35,7 +35,7 @@ export function MovieCard({ movie, onDelete }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           action: "unsave",
-          movieId: movie._id,
+          movieId: movie._id, 
          }),
       });
     } else {

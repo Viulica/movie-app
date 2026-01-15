@@ -7,6 +7,9 @@ const SavedMovieSchema = new mongoose.Schema
   movieId : {
     type: String
   },
+  saved : {
+    type: Boolean
+  },
   rating : {
     type: Number
   }

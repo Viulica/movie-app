@@ -16,7 +16,6 @@ export async function GET(request)
         await connectDB();
         const { searchParams } = new URL(request.url);
         const type = searchParams.get("type");
-        console.log("GET.type =",type);
 
         const saves = await SavedMovie.find({});
 
@@ -24,12 +23,7 @@ export async function GET(request)
 
           // popularity algorithm
 
-          /// popularity gain from a save/rating
-          function calculateValue(rtng) {
-            if(!rtng) return 1;
-            return (rtng -1) / 3;
-          }
-
+      
           /// filter out saves older than designated time window
           const timeRange = searchParams.get("timeRange");
           const timeOfReq = Date.now();
@@ -42,9 +36,23 @@ export async function GET(request)
             new Date(s.createdAt).getTime() > timeOfReq - maxTime
           );
 
+          /// popularity gain from a save/rating
+          function calculateValue(rtng, date) {
+            if(rtng==1) return 0;
+            const timeSinceEntry = Date.now() - date.getTime();
+            const lifespanPerc = timeSinceEntry / maxTime;
+            const dateImportance = 0.18;
+            if(!rtng)
+            {
+              return 1 - lifespanPerc * dateImportance;
+            }
+            let base = rtng / 3;
+            return base - base * lifespanPerc * dateImportance;
+          }
+
           /// calculate popularity score for each saved movie
           const scoreMap = dateFilter.reduce((acm,s) => {
-            acm[s.movieId] = (acm[s.movieId] || 0)+calculateValue(s.rating);
+            acm[s.movieId] = (acm[s.movieId] || 0)+calculateValue(s.rating, s.updatedAt);
             return acm;
           }, {});
           const sorted = Object.fromEntries(
@@ -98,26 +106,28 @@ export async function POST(request) {
     switch(action)
     {
       //saving
-
+      
       case "save":
-
       const duplicate = await SavedMovie.findOne({
         userId: session.user.id,
         movieId : movieId,
       })
       if(duplicate)
       {
+        duplicate.saved = true;
+        await duplicate.save();
         return NextResponse.json(
-        { success: false, message: "already saved"}
-        );
+        {
+            success: true,
+            message: "saved",
+        })
       }
 
       const save = await SavedMovie.create({
           userId: session.user.id,
           movieId,
+          saved : true
       });
-
-      console.log("saved movie = ",save);
 
       return NextResponse.json({success: true});
       break;
@@ -125,8 +135,6 @@ export async function POST(request) {
       // rating
 
       case "rate":
-        console.log("Rating a movie ",rating);
-
         const mv = await SavedMovie.findOne({
         userId: session.user.id,
         movieId : movieId,
@@ -140,11 +148,20 @@ export async function POST(request) {
           return NextResponse.json(
           { success: true, message: "movie rated"});
         }
-        // ignore for now
+        // movie not saved, create new entry and rate
         else
         {
+          const save = await SavedMovie.create({
+          userId: session.user.id,
+          movieId,
+          saved : false,
+          rating : rating
+          });
           return NextResponse.json(
-          { success: false, message: "cannot rate unsaved movies"});
+          {
+            success: true,
+            message: "rated",
+          })
         }
         break;
     }
@@ -165,7 +182,17 @@ export async function DELETE(request) {
 
   const { action, movieId } = await request.json();
 
-  const deleting = await SavedMovie.findOneAndDelete(
+  const save = await SavedMovie.findOne(
+  {
+    movieId: movieId,
+    userId : session.user.id
+  }
+  )
+
+  // delete the entry from db
+  if(!save.rating)
+  {
+    const deleting = await SavedMovie.deleteOne(
    {
      movieId: movieId,
      userId : session.user.id,
@@ -174,12 +201,27 @@ export async function DELETE(request) {
   if(deleting)
   {
     return NextResponse.json(
-        {
-            success: true,
-            message: "removed from saves list",
-        })
+    {
+        success: true,
+        message: "unsaved",
+    })
   }
-  else{
+  else
+  {
     console.log("error while unsaving");
   }
+  }
+  // rating exists, so only unsave movie
+  else
+  {
+    save.saved = false;
+    await save.save();
+    return NextResponse.json(
+    {
+        success: true,
+        message: "unsaved",
+    })
+  }
+
+  
 }
