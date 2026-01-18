@@ -202,7 +202,7 @@ export function MovieCard({
           {/* Ratings */}
           <div>
             {movie.imdbRating > 0 && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <Star
                   className="size-4 fill-yellow-400 stroke-yellow-400"
                   aria-hidden="true"
@@ -225,7 +225,7 @@ export function MovieCard({
               </div>
             )}
             {movie.rating > 0 && movie.source === "TMDB" && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <Star
                   className="size-4 fill-blue-400 stroke-blue-400"
                   aria-hidden="true"
@@ -241,7 +241,7 @@ export function MovieCard({
               </div>
             )}
             {movie.traktRating && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <Star
                   className="size-4 fill-green-400 stroke-green-400"
                   aria-hidden="true"
@@ -273,12 +273,14 @@ export function MovieCard({
                 )}
               </div>
             )}
-            {movie.appRating && movie.appRating > 0 && (
-              <div className="flex items-center gap-1.5">
+
+            {movie.appRating > 0 && (
+              <div className="flex items-center gap-1">
                 <Star
                   className="size-4 fill-purple-400 stroke-purple-400"
                   aria-hidden="true"
                 />
+
                 <span className="">
                   Pogled: {movie.appRating.toFixed(1)} / 10
                 </span>
@@ -287,13 +289,13 @@ export function MovieCard({
           </div>
 
           {movie.traktWatchers && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <Users className="size-3" />
               <span>{movie.traktWatchers} gledatelja</span>
             </div>
           )}
           {movie.traktRuntime && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <Clock className="size-3" />
               <span>{movie.traktRuntime} min</span>
             </div>
@@ -304,7 +306,7 @@ export function MovieCard({
                 href={`https://www.youtube.com/watch?v=${movie.youtubeVideoId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:underline"
+                className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:underline"
               >
                 <Play className="size-4" />
                 <span className="text-xs font-medium">Pogledaj trailer</span>

@@ -99,6 +99,18 @@ export async function GET(request) {
         return acm;
       }, {});
 
+      // Calculate appRating (average user rating) for each movie
+      const appRatings = {};
+      savedMovies.forEach((s) => {
+        if (s.rating && s.rating > 0) {
+          if (!appRatings[s.movieId]) {
+            appRatings[s.movieId] = { totalRating: 0, count: 0 };
+          }
+          appRatings[s.movieId].totalRating += s.rating;
+          appRatings[s.movieId].count++;
+        }
+      });
+
       // Add popularity scores to movies
       const moviesWithPopularity = movies.map((movie) => ({
         ...movie.toObject(),
@@ -109,6 +121,11 @@ export async function GET(request) {
         ratingCount: dateFilter.filter(
           (s) => s.movieId === movie._id.toString() && s.rating && s.rating > 0
         ).length,
+        appRating:
+          appRatings[movie._id.toString()]?.count > 0
+            ? appRatings[movie._id.toString()].totalRating /
+              appRatings[movie._id.toString()].count
+            : 0,
       }));
 
       return NextResponse.json({ success: true, data: moviesWithPopularity });
