@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Movie from "@/models/Movie";
+import SavedMovie from "@/models/SavedMovie";
 import mongoose from "mongoose";
 import {
   getPopularMovies,
@@ -68,7 +69,49 @@ export async function GET(request) {
       }
 
       const movies = await Movie.find(query).sort({ fetchedAt: -1 }).limit(100);
-      return NextResponse.json({ success: true, data: movies });
+
+      // Calculate popularity scores from SavedMovie collection
+      const savedMovies = await SavedMovie.find({});
+
+      // Calculate popularity score for each movie using the same algorithm
+      const timeOfReq = Date.now();
+      const maxTime = 86400000 * 360; // 1 year window for general fetch
+
+      const dateFilter = savedMovies.filter(
+        (s) => new Date(s.createdAt).getTime() > timeOfReq - maxTime
+      );
+
+      function calculateValue(rtng, date) {
+        if (rtng == 1) return 0;
+        const timeSinceEntry = Date.now() - date.getTime();
+        const lifespanPerc = timeSinceEntry / maxTime;
+        const dateImportance = 0.18;
+        if (!rtng) {
+          return 1 - lifespanPerc * dateImportance;
+        }
+        let base = rtng / 3;
+        return base - base * lifespanPerc * dateImportance;
+      }
+
+      const popularityScores = dateFilter.reduce((acm, s) => {
+        acm[s.movieId] =
+          (acm[s.movieId] || 0) + calculateValue(s.rating, s.updatedAt);
+        return acm;
+      }, {});
+
+      // Add popularity scores to movies
+      const moviesWithPopularity = movies.map((movie) => ({
+        ...movie.toObject(),
+        popularityScore: popularityScores[movie._id.toString()] || 0,
+        saveCount: dateFilter.filter(
+          (s) => s.movieId === movie._id.toString() && s.saved
+        ).length,
+        ratingCount: dateFilter.filter(
+          (s) => s.movieId === movie._id.toString() && s.rating && s.rating > 0
+        ).length,
+      }));
+
+      return NextResponse.json({ success: true, data: moviesWithPopularity });
     }
 
     if (action === "cleanup") {

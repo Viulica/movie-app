@@ -15,21 +15,64 @@ import {
 } from "@/components/ui/empty";
 import { TrendingUpIcon, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import { TimeRangeTabs } from "@/components/time-range-tabs";
 
 export default function Popular() {
   const { data: session, status } = useSession();
   const [timeRange, setTimeRange] = useState("today");
-  const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
-    useMovies();
+  const {
+    movies,
+    loading,
+    savedMovies,
+    ratedMovies,
+    fetchMovies,
+    fetchAndSave,
+    fetchSavedMovies,
+    fetchRatedMovies,
+    deleteMovie,
+    deleteAll,
+  } = useMovies();
   const [announcement, setAnnouncement] = useState("");
+  const [popularityScores, setPopularityScores] = useState({});
+  const [loadingPopularity, setLoadingPopularity] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
       fetchMovies();
+      fetchSavedMovies();
+      fetchRatedMovies();
     }
   }, [status]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchPopularityScores();
+    }
+  }, [status, timeRange]);
+
+  const fetchPopularityScores = async () => {
+    setLoadingPopularity(true);
+    try {
+      const response = await fetch(
+        `/api/saved_movies?type=popularity&timeRange=${timeRange}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        const scores = JSON.parse(data.final);
+        setPopularityScores(scores);
+      }
+    } catch (error) {
+      console.error("Error fetching popularity scores:", error);
+      toast.error("Greška pri dohvaćanju popularnosti");
+    } finally {
+      setLoadingPopularity(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && movies.length > 0) {
@@ -37,32 +80,38 @@ export default function Popular() {
     }
   }, [movies, loading]);
 
-  // Sort movies by simulated popularity score with time range consideration
-  const getPopularityScore = (movie, range) => {
-    const baseScore = parseInt(movie._id.slice(-4), 16) || Math.random() * 1000;
-
-    // Simulate time-based popularity decay
-    const timeMultiplier =
-      {
-        today: 1.5,
-        week: 1.3,
-        month: 1.1,
-        year: 1.0,
-        all: 1.0,
-      }[range] || 1.0;
-
-    // Add some randomness for time-based filtering simulation
-    const timeRandomness = Math.random() * 0.5 + 0.75;
-
-    return baseScore * timeMultiplier * timeRandomness;
+  const handleSaveToggle = async () => {
+    await fetchSavedMovies();
+    await fetchMovies(); // Refresh to get updated save counts
+    await fetchPopularityScores(); // Refresh popularity scores
   };
 
+  const handleRatingChange = async () => {
+    await fetchRatedMovies();
+    await fetchMovies(); // Refresh to get updated popularity scores
+    await fetchPopularityScores(); // Refresh popularity scores
+  };
+
+  // Sort movies by real popularity score from database
   const popularMovies = [...movies]
     .map((movie) => ({
       ...movie,
-      popularityScore: getPopularityScore(movie, timeRange),
+      popularityScore: popularityScores[movie._id] || 0,
     }))
     .sort((a, b) => b.popularityScore - a.popularityScore);
+
+  // Create maps for saved/rated status
+  const savedMap = {};
+  const ratingsMap = {};
+
+  savedMovies.forEach((sm) => {
+    savedMap[sm.movieId] = true;
+  });
+  ratedMovies.forEach((rm) => {
+    if (rm.rating && rm.rating > 0) {
+      ratingsMap[rm.movieId] = rm.rating;
+    }
+  });
 
   return (
     <div>
@@ -134,6 +183,14 @@ export default function Popular() {
                   key={movie._id}
                   movie={movie}
                   onDelete={deleteMovie}
+                  isSaved={savedMap[movie._id] || false}
+                  userRating={ratingsMap[movie._id] || 0}
+                  onSaveToggle={() => {
+                    fetchSavedMovies();
+                  }}
+                  onRatingChange={() => {
+                    fetchRatedMovies();
+                  }}
                 />
               ))}
             </div>

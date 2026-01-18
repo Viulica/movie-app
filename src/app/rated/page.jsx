@@ -26,59 +26,61 @@ import { Button } from "@/components/ui/button";
 export default function Watched() {
   const { data: session, status } = useSession();
   const [currentFilter, setCurrentFilter] = useState({ type: "", value: "" });
-  const [movieRatings, setMovieRatings] = useState({});
-  const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
-    useMovies();
+  const {
+    movies,
+    loading,
+    ratedMovies,
+    fetchMovies,
+    fetchAndSave,
+    fetchRatedMovies,
+    deleteMovie,
+    deleteAll,
+  } = useMovies();
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
-      // Load movie ratings from localStorage
-      const personalData = JSON.parse(
-        localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-          '{"ratedMovies":{},"savedMovies":{}}'
-      );
-      setMovieRatings(personalData.ratedMovies);
-
-      // Listen for storage changes
-      const handleStorageChange = () => {
-        const personalData = JSON.parse(
-          localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-            '{"ratedMovies":{},"savedMovies":{}}'
-        );
-        setMovieRatings(personalData.ratedMovies);
-      };
-
-      // Listen for custom event
-      const handleMovieRatingsChanged = (event) => {
-        setMovieRatings(event.detail);
-      };
-
-      window.addEventListener("storage", handleStorageChange);
-      window.addEventListener("movieRatingsChanged", handleMovieRatingsChanged);
-      return () => {
-        window.removeEventListener(
-          "movieRatingsChanged",
-          handleMovieRatingsChanged
-        );
-      };
+      fetchRatedMovies();
     }
-    return;
   }, [status]);
 
   useEffect(() => {
-    const ratedMoviesList = movies.filter(
-      (movie) =>
-        movieRatings[movie._id]?.rate && movieRatings[movie._id].rate > 0
-    );
-    if (!loading && ratedMoviesList.length > 0) {
-      setAnnouncement(`Učitano ${ratedMoviesList.length} filmova`);
+    if (!loading && ratedMovies.length > 0) {
+      setAnnouncement(`Učitano ${ratedMovies.length} filmova`);
     }
-  }, [movieRatings, movies, loading]);
+  }, [ratedMovies, loading]);
 
-  const ratedMoviesList = movies.filter(
-    (movie) => movieRatings[movie._id]?.rate && movieRatings[movie._id].rate > 0
+  const handleSaveToggle = async () => {
+    await fetchRatedMovies();
+    await fetchMovies();
+  };
+
+  const handleRatingChange = async () => {
+    await fetchRatedMovies();
+    await fetchMovies();
+  };
+
+  // Create a set of rated movie IDs for quick lookup
+  const ratedMovieIds = new Set(
+    ratedMovies
+      .filter((rm) => rm.rating && rm.rating > 0)
+      .map((rm) => rm.movieId)
   );
+
+  // Filter movies to show only rated ones
+  const ratedMoviesList = movies.filter((movie) =>
+    ratedMovieIds.has(movie._id)
+  );
+
+  // Create a map for user ratings and saved status
+  const ratingsMap = {};
+  const savedMap = {};
+  ratedMovies.forEach((rm) => {
+    if (rm.rating && rm.rating > 0) {
+      ratingsMap[rm.movieId] = rm.rating;
+      savedMap[rm.movieId] = rm.saved || false;
+    }
+  });
 
   if (status === "loading") {
     return (
@@ -173,6 +175,10 @@ export default function Watched() {
                   key={movie._id}
                   movie={movie}
                   onDelete={deleteMovie}
+                  isSaved={savedMap[movie._id] || false}
+                  userRating={ratingsMap[movie._id] || 0}
+                  onSaveToggle={handleSaveToggle}
+                  onRatingChange={handleRatingChange}
                 />
               ))}
             </div>

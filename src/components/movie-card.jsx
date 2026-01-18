@@ -6,115 +6,122 @@ import { Rating } from "@/components/shadcnblocks/rating";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 
+export function MovieCard({
+  movie,
+  onDelete,
+  isSaved: initialSaved = false,
+  userRating: initialRating = 0,
+  onSaveToggle,
+  onRatingChange,
+}) {
+  const [isSaved, setIsSaved] = useState(initialSaved);
+  const [userRating, setUserRating] = useState(initialRating);
+  const [saving, setSaving] = useState(false);
+  const [rating, setRating] = useState(false);
+  const [saveCount, setSaveCount] = useState(movie?.saveCount || 0);
 
-export function MovieCard({ movie, onDelete }) {
-  const [isSaved, setIsSaved] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+  // Update internal state when props change
+  useEffect(() => {
+    setIsSaved(initialSaved);
+  }, [initialSaved]);
 
   useEffect(() => {
-    const personalData = JSON.parse(
-      localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-        '{"ratedMovies":{},"savedMovies":{}}'
-    );
-    setIsSaved(!!personalData.savedMovies[movie._id]);
+    setUserRating(initialRating);
+  }, [initialRating]);
 
-    setUserRating(personalData.ratedMovies[movie._id]?.rate || 0);
-  }, [movie._id]);
+  useEffect(() => {
+    setSaveCount(movie?.saveCount || 0);
+  }, [movie?.saveCount]);
 
   async function toggleSave() {
-    const personalData = JSON.parse(
-      localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-        '{"ratedMovies":{},"savedMovies":{}}'
-    );
-    if (isSaved) {
-      delete personalData.savedMovies[movie._id];
-      const response = await fetch('/api/saved_movies',
-      {
-        method:"DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          action: "unsave",
-          movieId: movie._id, 
-         }),
-      });
-    } else {
-      try {
+    setSaving(true);
+    try {
+      if (isSaved) {
         const response = await fetch("/api/saved_movies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          action: "save",
-          movieId: movie._id,
-         }),
-      });
-      }
-      catch(error) {
-        console.log(error);
-      }
-      personalData.savedMovies[movie._id] = {
-        timestamp: Date.now(),
-        like: true,
-      };
-    }
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "unsave",
+            movieId: movie._id,
+          }),
+        });
 
-    localStorage.setItem(
-      "DRUMREtempMoviesPersonalData",
-      JSON.stringify(personalData)
-    );
-    setIsSaved(!isSaved);
-    window.dispatchEvent(
-      new CustomEvent("savedMoviesChanged", {
-        detail: personalData.savedMovies,
-      })
-    );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setIsSaved(false);
+          setSaveCount((prev) => Math.max(0, prev - 1)); // Decrease count by 1
+          toast.success("Film je uklonjen iz spremljenih");
+          if (onSaveToggle) await onSaveToggle();
+        }
+      } else {
+        const response = await fetch("/api/saved_movies", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "save",
+            movieId: movie._id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setIsSaved(true);
+          setSaveCount((prev) => prev + 1); // Increase count by 1
+          toast.success("Film je spremljen");
+          if (onSaveToggle) await onSaveToggle();
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling save:", error);
+      toast.error("Greška pri spremanju filma");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleRatingChange(newRating) {
-    //todo remove
-    const personalData = JSON.parse(
-      localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-        '{"ratedMovies":{},"savedMovies":{}}'
-    );
-    // 
-
-
-    if (newRating === 0) {
-      //todo
-      delete personalData.ratedMovies[movie._id];
-    } else {
-      //todo remove
-      personalData.ratedMovies[movie._id] = {
-        rate: newRating,
-        timestamp: Date.now(),
-      };
-      //
-
-      try {
-        const response = await fetch("/api/saved_movies", {
+    setRating(true);
+    try {
+      const response = await fetch("/api/saved_movies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           action: "rate",
           movieId: movie._id,
-          rating : newRating
-         }),
+          rating: newRating,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      catch(error) {
-        console.log(error);
+
+      const data = await response.json();
+      if (data.success) {
+        setUserRating(newRating);
+        if (newRating === 0) {
+          toast.success("Ocjena je uklonjena");
+        } else {
+          toast.success(`Film je ocijenjen sa ${newRating}/10`);
+        }
+        if (onRatingChange) await onRatingChange();
       }
+    } catch (error) {
+      console.error("Error rating movie:", error);
+      toast.error("Greška pri ocjenjivanju filma");
+    } finally {
+      setRating(false);
     }
-    localStorage.setItem(
-      "DRUMREtempMoviesPersonalData",
-      JSON.stringify(personalData)
-    );
-    setUserRating(newRating);
-    window.dispatchEvent(
-      new CustomEvent("movieRatingsChanged", {
-        detail: personalData.ratedMovies,
-      })
-    );
   }
 
   return (
@@ -173,6 +180,7 @@ export function MovieCard({ movie, onDelete }) {
               aria-label={
                 isSaved ? "Ukloni iz spremljenih" : "Dodaj u spremljene"
               }
+              disabled={saving}
             >
               <Heart
                 className={`size-4 sm:size-6 ${
@@ -182,9 +190,11 @@ export function MovieCard({ movie, onDelete }) {
                 }`}
               />
             </Button>
-            <span className="text-xs text-muted-foreground">
-              ({Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000})
-            </span>
+            {movie.saveCount !== undefined && (
+              <span className="text-xs text-muted-foreground">
+                ({saveCount})
+              </span>
+            )}
           </div>
         </div>
 

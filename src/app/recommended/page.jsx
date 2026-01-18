@@ -26,56 +26,48 @@ import { Button } from "@/components/ui/button";
 export default function Recommended() {
   const { data: session, status } = useSession();
   const [currentFilter, setCurrentFilter] = useState({ type: "", value: "" });
-  const [savedMovies, setSavedMovies] = useState({});
-  const [movieRatings, setMovieRatings] = useState({});
-  const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
-    useMovies();
+  const {
+    movies,
+    loading,
+    savedMovies,
+    ratedMovies,
+    fetchMovies,
+    fetchAndSave,
+    fetchSavedMovies,
+    fetchRatedMovies,
+    deleteMovie,
+    deleteAll,
+  } = useMovies();
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
-      // Get saved and rated movies to exclude from recommendations
-      const personalData = JSON.parse(
-        localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-          '{"ratedMovies":{},"savedMovies":{}}'
-      );
-      setSavedMovies(personalData.savedMovies);
-      setMovieRatings(personalData.ratedMovies);
-
-      // Listen for custom events
-      const handleSavedMoviesChanged = (event) => {
-        setSavedMovies(event.detail);
-      };
-      const handleMovieRatingsChanged = (event) => {
-        setMovieRatings(event.detail);
-      };
-
-      window.addEventListener("savedMoviesChanged", handleSavedMoviesChanged);
-      window.addEventListener("movieRatingsChanged", handleMovieRatingsChanged);
-
-      return () => {
-        window.removeEventListener(
-          "movieRatingsChanged",
-          handleMovieRatingsChanged
-        );
-      };
+      fetchSavedMovies();
+      fetchRatedMovies();
     }
-    return;
   }, [status]);
 
   useEffect(() => {
-    const recommendedMovies = movies.filter(
-      (movie) => !savedMovies[movie._id] && !movieRatings[movie._id]?.rate
-    );
+    const recommendedMovies = movies.filter((movie) => {
+      const isSaved = savedMovies.some((sm) => sm.movieId === movie._id);
+      const isRated = ratedMovies.some(
+        (rm) => rm.movieId === movie._id && rm.rating > 0
+      );
+      return !isSaved && !isRated;
+    });
     if (!loading && recommendedMovies.length > 0) {
       setAnnouncement(`Učitano ${recommendedMovies.length} filmova`);
     }
-  }, [savedMovies, movieRatings, movies, loading]);
+  }, [savedMovies, ratedMovies, movies, loading]);
 
   // Filter out movies that are already saved or rated
-  const recommendedMovies = movies.filter(
-    (movie) => !savedMovies[movie._id] && !movieRatings[movie._id]?.rate
-  );
+  const recommendedMovies = movies.filter((movie) => {
+    const isSaved = savedMovies.some((sm) => sm.movieId === movie._id);
+    const isRated = ratedMovies.some(
+      (rm) => rm.movieId === movie._id && rm.rating > 0
+    );
+    return !isSaved && !isRated;
+  });
 
   return (
     <div>
@@ -162,6 +154,16 @@ export default function Recommended() {
                   key={movie._id}
                   movie={movie}
                   onDelete={deleteMovie}
+                  isSaved={false}
+                  userRating={0}
+                  onSaveToggle={() => {
+                    fetchSavedMovies();
+                    fetchRatedMovies();
+                  }}
+                  onRatingChange={() => {
+                    fetchSavedMovies();
+                    fetchRatedMovies();
+                  }}
                 />
               ))}
             </div>

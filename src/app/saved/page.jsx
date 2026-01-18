@@ -26,54 +26,55 @@ import { Button } from "@/components/ui/button";
 export default function Favorites() {
   const { data: session, status } = useSession();
   const [currentFilter, setCurrentFilter] = useState({ type: "", value: "" });
-  const [savedMovies, setSavedMovies] = useState([]);
-  const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
-    useMovies();
+  const {
+    movies,
+    loading,
+    savedMovies,
+    fetchMovies,
+    fetchAndSave,
+    fetchSavedMovies,
+    deleteMovie,
+    deleteAll,
+  } = useMovies();
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
-      // Load saved movies from localStorage
-      const personalData = JSON.parse(
-        localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-          '{"ratedMovies":{},"savedMovies":{}}'
-      );
-      setSavedMovies(personalData.savedMovies);
-
-      // Listen for storage changes
-      const handleStorageChange = () => {
-        const personalData = JSON.parse(
-          localStorage.getItem("DRUMREtempMoviesPersonalData") ||
-            '{"ratedMovies":{},"savedMovies":{}}'
-        );
-        setSavedMovies(personalData.savedMovies);
-      };
-
-      window.addEventListener("storage", handleStorageChange);
-      // Listen for custom event
-      const handleSavedMoviesChanged = (event) => {
-        setSavedMovies(event.detail);
-      };
-      window.addEventListener("savedMoviesChanged", handleSavedMoviesChanged);
-      return () => {
-        window.removeEventListener("storage", handleStorageChange);
-        window.removeEventListener(
-          "savedMoviesChanged",
-          handleSavedMoviesChanged
-        );
-      };
+      fetchSavedMovies();
     }
-    return;
   }, [status]);
 
   useEffect(() => {
-    const savedMoviesList = movies.filter((movie) => savedMovies[movie._id]);
-    if (!loading && savedMoviesList.length > 0) {
-      setAnnouncement(`Učitano ${savedMoviesList.length} filmova`);
+    if (!loading && savedMovies.length > 0) {
+      setAnnouncement(`Učitano ${savedMovies.length} filmova`);
     }
-  }, [savedMovies, movies, loading]);
+  }, [savedMovies, loading]);
 
-  const savedMoviesList = movies.filter((movie) => savedMovies[movie._id]);
+  const handleSaveToggle = async () => {
+    await fetchSavedMovies();
+    await fetchMovies();
+  };
+
+  const handleRatingChange = async () => {
+    await fetchSavedMovies();
+    await fetchMovies();
+  };
+
+  // Create a set of saved movie IDs for quick lookup
+  const savedMovieIds = new Set(savedMovies.map((sm) => sm.movieId));
+
+  // Filter movies to show only saved ones
+  const savedMoviesList = movies.filter((movie) =>
+    savedMovieIds.has(movie._id)
+  );
+
+  // Create a map for user ratings
+  const ratingsMap = {};
+  savedMovies.forEach((sm) => {
+    if (sm.rating) {
+      ratingsMap[sm.movieId] = sm.rating;
+    }
+  });
 
   return (
     <div>
@@ -160,6 +161,10 @@ export default function Favorites() {
                   key={movie._id}
                   movie={movie}
                   onDelete={deleteMovie}
+                  isSaved={true}
+                  userRating={ratingsMap[movie._id] || 0}
+                  onSaveToggle={handleSaveToggle}
+                  onRatingChange={handleRatingChange}
                 />
               ))}
             </div>

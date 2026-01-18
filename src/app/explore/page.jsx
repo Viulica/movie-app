@@ -18,16 +18,58 @@ import { SearchIcon, FileTextIcon, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Explore() {
+  const { data: session, status } = useSession();
   const [currentFilter, setCurrentFilter] = useState({ type: "", value: "" });
-  const { movies, loading, fetchMovies, fetchAndSave, deleteMovie, deleteAll } =
-    useMovies();
+  const {
+    movies,
+    loading,
+    savedMovies,
+    ratedMovies,
+    fetchMovies,
+    fetchAndSave,
+    fetchSavedMovies,
+    fetchRatedMovies,
+    deleteMovie,
+    deleteAll,
+  } = useMovies();
   const [announcement, setAnnouncement] = useState("");
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchMovies();
+      fetchSavedMovies();
+      fetchRatedMovies();
+    }
+  }, [status]);
 
   useEffect(() => {
     if (!loading && movies.length > 0) {
       setAnnouncement(`Učitano ${movies.length} filmova`);
     }
   }, [movies, loading]);
+
+  const handleSaveToggle = async () => {
+    await fetchSavedMovies();
+    await fetchMovies(); // Refresh to get updated save counts
+  };
+
+  const handleRatingChange = async () => {
+    await fetchRatedMovies();
+    await fetchMovies(); // Refresh to get updated popularity scores
+  };
+
+  // Create maps for saved/rated status
+  const savedMap = {};
+  const ratingsMap = {};
+
+  savedMovies.forEach((sm) => {
+    savedMap[sm.movieId] = true;
+  });
+  ratedMovies.forEach((rm) => {
+    if (rm.rating && rm.rating > 0) {
+      ratingsMap[rm.movieId] = rm.rating;
+    }
+  });
 
   return (
     <div>
@@ -115,6 +157,14 @@ export default function Explore() {
                   key={movie._id}
                   movie={movie}
                   onDelete={deleteMovie}
+                  isSaved={savedMap[movie._id] || false}
+                  userRating={ratingsMap[movie._id] || 0}
+                  onSaveToggle={() => {
+                    fetchSavedMovies();
+                  }}
+                  onRatingChange={() => {
+                    fetchRatedMovies();
+                  }}
                 />
               ))}
             </div>
