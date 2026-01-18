@@ -38,12 +38,7 @@ export function NavUserSidebar() {
 
   if (!session) {
     return (
-      <Button
-        onClick={() => signIn("google")}
-        className="w-full"
-        variant="outline"
-        size="lg"
-      >
+      <Button onClick={() => signIn("google")} className="w-full" size="lg">
         <svg className="mr-2 size-6" viewBox="0 0 24 24">
           <path
             fill="#4285F4"

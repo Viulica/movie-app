@@ -8,10 +8,12 @@ import { Separator } from "@/components/ui/separator";
 import { NavUserNavbar } from "@/components/navigation/nav-user-navbar";
 import { navigationLinks } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Eye } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -50,8 +52,12 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <AccessibilityWidget />
-          <ThemeToggle />
+          <div className={session ? "block" : "hidden sm:block"}>
+            <AccessibilityWidget />
+          </div>
+          <div className={session ? "block" : "hidden sm:block"}>
+            <ThemeToggle />
+          </div>
 
           <NavUserNavbar />
         </div>
