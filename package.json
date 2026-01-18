@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "fetch-movies": "node scripts/fetch-movies.mjs"
+    "fetch-movies": "node scripts/fetch-movies.mjs",
+    "dump-db": "node scripts/dump-database.mjs"
   },
   "dependencies": {
     "@netlify/functions": "^5.1.2",
