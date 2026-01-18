@@ -194,6 +194,7 @@ export default function Favorites() {
                       onDelete={deleteMovie}
                       isSaved={true}
                       userRating={ratingsMap[movie._id] || 0}
+                      isAuthenticated={true}
                       onSaveToggle={handleSaveToggle}
                       onRatingChange={handleRatingChange}
                     />

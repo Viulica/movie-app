@@ -198,6 +198,7 @@ export default function Watched() {
                   onDelete={deleteMovie}
                   isSaved={savedMap[movie._id] || false}
                   userRating={ratingsMap[movie._id] || 0}
+                  isAuthenticated={true}
                   onSaveToggle={handleSaveToggle}
                   onRatingChange={handleRatingChange}
                 />

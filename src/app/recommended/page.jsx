@@ -226,6 +226,7 @@ export default function Recommended() {
                       onDelete={deleteMovie}
                       isSaved={false}
                       userRating={0}
+                      isAuthenticated={true}
                       onSaveToggle={handleSaveToggle}
                       onRatingChange={handleRatingChange}
                     />

@@ -199,6 +199,7 @@ export default function Popular() {
                   onDelete={deleteMovie}
                   isSaved={savedMap[movie._id] || false}
                   userRating={ratingsMap[movie._id] || 0}
+                  isAuthenticated={status === "authenticated"}
                   onSaveToggle={() => {
                     if (status === "authenticated") {
                       fetchSavedMovies();
