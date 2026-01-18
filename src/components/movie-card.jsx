@@ -222,6 +222,17 @@ export function MovieCard({
                     IMDb: {movie.imdbRating.toFixed(1)} / 10
                   </span>
                 )}
+                {movie.imdbVotes && (
+                  <span className="text-xs text-gray-500">
+                    (
+                    {movie.imdbVotes > 1000000
+                      ? `${(movie.imdbVotes / 1000000).toFixed(1)}M`
+                      : movie.imdbVotes > 1000
+                      ? `${(movie.imdbVotes / 1000).toFixed(1)}K`
+                      : movie.imdbVotes}
+                    )
+                  </span>
+                )}
               </div>
             )}
             {movie.rating > 0 && movie.source === "TMDB" && (
@@ -238,6 +249,15 @@ export function MovieCard({
                 >
                   TMDB: {movie.rating.toFixed(1)} / 10
                 </Link>
+                {movie.tmdbVotes && (
+                  <span className="text-xs text-gray-500">
+                    (
+                    {movie.tmdbVotes > 1000
+                      ? `${(movie.tmdbVotes / 1000).toFixed(1)}K`
+                      : movie.tmdbVotes}
+                    )
+                  </span>
+                )}
               </div>
             )}
             {movie.traktRating && (
@@ -284,6 +304,11 @@ export function MovieCard({
                 <span className="">
                   Pogled: {movie.appRating.toFixed(1)} / 10
                 </span>
+                {movie.ratingCount && movie.ratingCount > 0 && (
+                  <span className="text-xs text-gray-500">
+                    ({movie.ratingCount})
+                  </span>
+                )}
               </div>
             )}
           </div>
