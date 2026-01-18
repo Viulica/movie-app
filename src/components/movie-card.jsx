@@ -147,12 +147,6 @@ export function MovieCard({
             </span>
           </div>
         )}
-
-        <div className="absolute top-2 right-2">
-          <Badge variant={movie.source === "TMDB" ? "default" : "secondary"}>
-            {movie.source}
-          </Badge>
-        </div>
       </div>
 
       <CardContent className="p-2 sm:py-4 h-full flex flex-col">

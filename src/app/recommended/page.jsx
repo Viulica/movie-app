@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 export default function Recommended() {
   const { data: session, status } = useSession();
@@ -113,42 +114,7 @@ export default function Recommended() {
         {announcement}
       </div>
 
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <Suspense fallback={null}>
-            <MovieFilter
-              fetchMovies={fetchMovies}
-              onFilterApplied={setCurrentFilter}
-              loading={loading}
-            />
-          </Suspense>
-
-          <div className="flex gap-2 items-center justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
-            <Button
-              onClick={fetchAndSave}
-              disabled={loading}
-              className="flex items-center gap-2 flex-1"
-            >
-              <Download className="size-4" />
-              {loading ? "Učitavanje..." : "Dohvati filmove"}
-            </Button>
-
-            {movies.length > 0 && (
-              <Button
-                onClick={deleteAll}
-                disabled={loading}
-                variant="destructive"
-                className="flex items-center gap-2 flex-1"
-              >
-                <Trash2 className="size-4" />
-                Obriši sve
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {loading && (
+      {status === "loading" && (
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
             <div className="mb-4">
@@ -158,50 +124,115 @@ export default function Recommended() {
         </div>
       )}
 
-      {loadingRecommendations && (
-        <div className="flex min-h-[400px] items-center justify-center">
-          <div className="text-center">
-            <div className="mb-4">
-              <Spinner className="size-8" />
-            </div>
-          </div>
-        </div>
+      {status === "unauthenticated" && (
+        <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SparklesIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+            </EmptyMedia>
+            <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
+              Prijava obavezna
+            </EmptyTitle>
+            <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
+              Prijavi se kako bi dobio personalizirane preporuke filmova
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
-      {!loadingRecommendations && (
+      {status === "authenticated" && (
         <>
-          {filteredRecommendations.length === 0 ? (
-            <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <SparklesIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
-                </EmptyMedia>
-                <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
-                  {recommendations.length === 0
-                    ? "Nema preporučenih filmova"
-                    : "Nema rezultata za primijenjene filtere"}
-                </EmptyTitle>
-                <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
-                  {recommendations.length === 0
-                    ? "Svi dostupni filmovi su već spremljeni ili ocijenjeni"
-                    : "Pokušajte prilagoditi filtere"}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredRecommendations.map((movie) => (
-                <MovieCard
-                  key={movie._id}
-                  movie={movie}
-                  onDelete={deleteMovie}
-                  isSaved={false}
-                  userRating={0}
-                  onSaveToggle={handleSaveToggle}
-                  onRatingChange={handleRatingChange}
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <Suspense fallback={null}>
+                <MovieFilter
+                  fetchMovies={fetchMovies}
+                  onFilterApplied={setCurrentFilter}
+                  loading={loading}
                 />
-              ))}
+              </Suspense>
+
+              <div className="flex gap-2 items-center justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <Button
+                  onClick={fetchAndSave}
+                  disabled={loading}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <Download className="size-4" />
+                  {loading ? "Učitavanje..." : "Dohvati filmove"}
+                </Button>
+
+                {movies.length > 0 && (
+                  <Button
+                    onClick={deleteAll}
+                    disabled={loading}
+                    variant="destructive"
+                    className="flex items-center gap-2 flex-1"
+                  >
+                    <Trash2 className="size-4" />
+                    Obriši sve
+                  </Button>
+                )}
+              </div>
             </div>
+          </div>
+
+          {loading && (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <div className="text-center">
+                <div className="mb-4">
+                  <Spinner className="size-8" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {loadingRecommendations && (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <div className="text-center">
+                <div className="mb-4">
+                  <Spinner className="size-8" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!loadingRecommendations && (
+            <>
+              {filteredRecommendations.length === 0 ? (
+                <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <SparklesIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    </EmptyMedia>
+                    <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
+                      {recommendations.length === 0
+                        ? "Nema preporučenih filmova"
+                        : "Nema rezultata za primijenjene filtere"}
+                    </EmptyTitle>
+                    <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
+                      {recommendations.length === 0
+                        ? "Svi dostupni filmovi su već spremljeni ili ocijenjeni"
+                        : "Pokušajte prilagoditi filtere"}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredRecommendations.map((movie) => (
+                    <MovieCard
+                      key={movie._id}
+                      movie={movie}
+                      onDelete={deleteMovie}
+                      isSaved={false}
+                      userRating={0}
+                      onSaveToggle={handleSaveToggle}
+                      onRatingChange={handleRatingChange}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}

@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 export default function Watched() {
   const { data: session, status } = useSession();
@@ -86,6 +87,26 @@ export default function Watched() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
         <Spinner className="size-8" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div>
+        <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <StarIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+            </EmptyMedia>
+            <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
+              Prijava obavezna
+            </EmptyTitle>
+            <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
+              Prijavi se kako bi pristupio svojim ocijenjenim filmovima
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     );
   }

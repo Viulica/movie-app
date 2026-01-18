@@ -39,15 +39,16 @@ export default function Popular() {
   const [loadingPopularity, setLoadingPopularity] = useState(false);
 
   useEffect(() => {
+    fetchMovies();
+    fetchPopularityScores();
     if (status === "authenticated") {
-      fetchMovies();
       fetchSavedMovies();
       fetchRatedMovies();
     }
   }, [status]);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status !== "loading") {
       fetchPopularityScores();
     }
   }, [status, timeRange]);
@@ -95,7 +96,11 @@ export default function Popular() {
   // Sort movies by real popularity score from database
   const popularMovies = [...movies]
     .filter((movie) => {
-      // Filter out movies that are already rated (watched)
+      // If user is not authenticated, show all movies
+      if (status !== "authenticated") {
+        return true;
+      }
+      // Filter out movies that are already rated (watched) - only for authenticated users
       const isRated = ratedMovies.some(
         (rm) => rm.movieId === movie._id && rm.rating > 0
       );
@@ -111,14 +116,16 @@ export default function Popular() {
   const savedMap = {};
   const ratingsMap = {};
 
-  savedMovies.forEach((sm) => {
-    savedMap[sm.movieId] = true;
-  });
-  ratedMovies.forEach((rm) => {
-    if (rm.rating && rm.rating > 0) {
-      ratingsMap[rm.movieId] = rm.rating;
-    }
-  });
+  if (status === "authenticated") {
+    savedMovies.forEach((sm) => {
+      savedMap[sm.movieId] = true;
+    });
+    ratedMovies.forEach((rm) => {
+      if (rm.rating && rm.rating > 0) {
+        ratingsMap[rm.movieId] = rm.rating;
+      }
+    });
+  }
 
   return (
     <div>
@@ -193,10 +200,14 @@ export default function Popular() {
                   isSaved={savedMap[movie._id] || false}
                   userRating={ratingsMap[movie._id] || 0}
                   onSaveToggle={() => {
-                    fetchSavedMovies();
+                    if (status === "authenticated") {
+                      fetchSavedMovies();
+                    }
                   }}
                   onRatingChange={() => {
-                    fetchRatedMovies();
+                    if (status === "authenticated") {
+                      fetchRatedMovies();
+                    }
                   }}
                 />
               ))}

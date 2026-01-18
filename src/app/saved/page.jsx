@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 export default function Favorites() {
   const { data: session, status } = useSession();
@@ -82,42 +83,7 @@ export default function Favorites() {
         {announcement}
       </div>
 
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <Suspense fallback={null}>
-            <MovieFilter
-              fetchMovies={fetchMovies}
-              onFilterApplied={setCurrentFilter}
-              loading={loading}
-            />
-          </Suspense>
-
-          <div className="flex gap-2 items-center justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
-            <Button
-              onClick={fetchAndSave}
-              disabled={loading}
-              className="flex items-center gap-2 flex-1"
-            >
-              <Download className="size-4" />
-              {loading ? "Učitavanje..." : "Dohvati filmove"}
-            </Button>
-
-            {movies.length > 0 && (
-              <Button
-                onClick={deleteAll}
-                disabled={loading}
-                variant="destructive"
-                className="flex items-center gap-2 flex-1"
-              >
-                <Trash2 className="size-4" />
-                Obriši sve
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {loading && (
+      {status === "loading" && (
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
             <div className="mb-4">
@@ -127,47 +93,114 @@ export default function Favorites() {
         </div>
       )}
 
-      {!loading && (
+      {status === "unauthenticated" && (
+        <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <HeartIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+            </EmptyMedia>
+            <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
+              Prijava obavezna
+            </EmptyTitle>
+            <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
+              Prijavi se kako bi vidio svoje spremljene filmove
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+
+      {status === "authenticated" && (
         <>
-          {currentFilter.type && currentFilter.value && (
-            <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-900/20">
-              <p className="text-sm text-blue-900 dark:text-blue-300">
-                {savedMoviesList.length === 0
-                  ? "Nema rezultata za odabrani filter."
-                  : `Pronađeno ${savedMoviesList.length} ${
-                      savedMoviesList.length === 1 ? "rezultat" : "rezultata"
-                    }`}
-              </p>
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <Suspense fallback={null}>
+                <MovieFilter
+                  fetchMovies={fetchMovies}
+                  onFilterApplied={setCurrentFilter}
+                  loading={loading}
+                />
+              </Suspense>
+
+              <div className="flex gap-2 items-center justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <Button
+                  onClick={fetchAndSave}
+                  disabled={loading}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <Download className="size-4" />
+                  {loading ? "Učitavanje..." : "Dohvati filmove"}
+                </Button>
+
+                {movies.length > 0 && (
+                  <Button
+                    onClick={deleteAll}
+                    disabled={loading}
+                    variant="destructive"
+                    className="flex items-center gap-2 flex-1"
+                  >
+                    <Trash2 className="size-4" />
+                    Obriši sve
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {loading && (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <div className="text-center">
+                <div className="mb-4">
+                  <Spinner className="size-8" />
+                </div>
+              </div>
             </div>
           )}
-          {savedMoviesList.length === 0 ? (
-            <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <HeartIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
-                </EmptyMedia>
-                <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
-                  Nema spremljenih filmova
-                </EmptyTitle>
-                <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
-                  Kliknite na srce da spremite filmove
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {savedMoviesList.map((movie) => (
-                <MovieCard
-                  key={movie._id}
-                  movie={movie}
-                  onDelete={deleteMovie}
-                  isSaved={true}
-                  userRating={ratingsMap[movie._id] || 0}
-                  onSaveToggle={handleSaveToggle}
-                  onRatingChange={handleRatingChange}
-                />
-              ))}
-            </div>
+
+          {!loading && (
+            <>
+              {currentFilter.type && currentFilter.value && (
+                <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-900/20">
+                  <p className="text-sm text-blue-900 dark:text-blue-300">
+                    {savedMoviesList.length === 0
+                      ? "Nema rezultata za odabrani filter."
+                      : `Pronađeno ${savedMoviesList.length} ${
+                          savedMoviesList.length === 1
+                            ? "rezultat"
+                            : "rezultata"
+                        }`}
+                  </p>
+                </div>
+              )}
+              {savedMoviesList.length === 0 ? (
+                <Empty className="w-fit mx-auto border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-8 rounded-md">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <HeartIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    </EmptyMedia>
+                    <EmptyTitle className="text-base font-medium text-gray-900 dark:text-white">
+                      Nema spremljenih filmova
+                    </EmptyTitle>
+                    <EmptyDescription className="text-sm text-gray-500 dark:text-gray-400">
+                      Kliknite na srce da spremite filmove
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {savedMoviesList.map((movie) => (
+                    <MovieCard
+                      key={movie._id}
+                      movie={movie}
+                      onDelete={deleteMovie}
+                      isSaved={true}
+                      userRating={ratingsMap[movie._id] || 0}
+                      onSaveToggle={handleSaveToggle}
+                      onRatingChange={handleRatingChange}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}
